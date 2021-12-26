@@ -18,7 +18,8 @@ def mcstart():
 def serverStatus():
     while True:
         try:
-            players = server.status.players.online
+            stats = server.status()
+            players = stats.players.online
         except:
             break
 
@@ -52,8 +53,7 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})'
     )
 
-
-@bot.command(name='mcstart', help='starts up minecraft instance')
+@bot.command(name='mcstart', help='starts up minecraft server')
 async def startmc(ctx):
     print('Recieved start command, rev yer fukin engines')
     await ctx.send('Command recieved, standby')
@@ -65,10 +65,7 @@ async def startmc(ctx):
         newThread = threading.Thread(target=mcstart, daemon=True)
         newThread.start()
 
-        newThread = threading.thread(target=serverStatus, daemon=True)
-        newThread.start()
-
-        await ctx.send('Server starting... please wait')
+    await ctx.send('Server starting... please wait')
 
     running = False
 
@@ -79,6 +76,9 @@ async def startmc(ctx):
         except:
             running = False
         
+    newThread = threading.Thread(target=serverStatus, daemon=True)
+    newThread.start()    
+    
     await ctx.send('Server is up. Reminder: if server is dormant for 15+ mins, will automatically shutdown. Enjoy!')
 
 @bot.command(name='mcstop', help='stops the minecraft server')
@@ -101,23 +101,22 @@ async def stopmc(ctx):
     else:
         await ctx.send('Server already shutdown, knob')
 
-@bot.command(name='secret', help='run at own risk')
-async def trollolol(ctx):
-    print('what a dumass')
-    await ctx.send('Hacking server')
+@bot.command(name='mcstatus', help='pulls the mcStatus data')
+async def stats(ctx):
+    running = False
+    try:
+        server.status()
+        running = True
+    except:
+        running = False
+
+    if running == True:
+        stats = server.status()
+        players = stats.players.online
+        message = "Server is currently online with " + str(players) + " players."
+    if running == False:
+        message = "Server currently offline."
     
-    i=0
-
-    await ctx.create_dm()
-
-    while i > 40:
-        await ctx.dm_channel.send(
-            f'Get 0wn3d nerd'
-        )
-        await ctx.dm_channel.send('https://c.tenor.com/58Fs805blXkAAAAS/stick-bug.gif')
-        i = i+1
-
-    await ctx.send('Server hacked nerd')
-    await ctx.send('https://c.tenor.com/58Fs805blXkAAAAS/stick-bug.gif')
+    await ctx.send(message)
 
 bot.run(TOKEN)
