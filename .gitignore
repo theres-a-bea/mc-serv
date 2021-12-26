@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+# Stops env variable
+.env
+
+#stops mac being a cunt
+.DS_Store
+
 # Distribution / packaging
 .Python
 build/
